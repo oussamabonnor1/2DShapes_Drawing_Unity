@@ -1,28 +1,60 @@
 ﻿using System.Linq;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class GameManager : MonoBehaviour {
 	List<Vector2> positions;
 	Vector2 position;
+	public String[] colorPicker;
+	public bool continousTracking;
+	public Text text;
+	public Material lineColor;
+	Color myColor = new Color();
 	// Use this for initialization
 	void Start () {
 		positions = new List<Vector2>();   
 	}
 
 	public void Update(){
-		if(Input.GetMouseButtonDown(0)){
+		if(!continousTracking){
+			if(Input.GetMouseButtonDown(0)){
+				drawingNodes();
+			}
+		}else{
+			if(Input.GetMouseButton(0)){
+				drawingNodes();
+			}
+		}
+		if(Input.GetMouseButtonDown(1)){
+			MakeShape(positions.ToArray(),myColor);
+		}
+	}
+
+	public void ContiniousTracking(){
+		continousTracking = ! continousTracking;
+		if(continousTracking){
+			text.text = "ContiniousTracking: on";
+		 	GetComponent<LineRenderer>().SetWidth(0.25f,0.25f);
+		}else {
+			text.text = "continiousTracking: off";
+			GetComponent<LineRenderer>().SetWidth(0.07f,0.07f);
+		}
+		positions = new List<Vector2>();
+	}
+
+	public void drawingNodes(){
+		if(positions.Count == 1){
+					ColorUtility.TryParseHtmlString(colorPicker[Random.Range(0,colorPicker.Length)], out myColor);
+					lineColor.color = myColor;
+				}
 			position = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 			positions.Add(position);
 			GetComponent<LineRenderer>().SetVertexCount(positions.Count);
 			GetComponent<LineRenderer>().SetPosition(positions.Count-1,position);
-		}
-		if(Input.GetMouseButtonDown(1)){
-			Color color = Random.ColorHSV();
-			MakeShape(positions.ToArray(),color);
-			
-		}
 	}
 
 	public void MakeShape(Vector2[] vertices2D, Color color){
